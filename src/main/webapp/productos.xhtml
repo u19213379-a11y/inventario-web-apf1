@@ -1,0 +1,43 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+    template="/WEB-INF/plantillas/layout.xhtml">
+    <ui:define name="titulo">Productos</ui:define>
+    <ui:define name="contenido">
+      <div class="mb-4"><div class="eyebrow">Catálogo</div><h1 class="page-title">Productos</h1><p class="lead-sub">Registra productos y consulta el stock con filtros y paginación.</p></div>
+      <h:messages globalOnly="true" layout="list" infoClass="text-success" errorClass="text-danger" styleClass="alert alert-light border" />
+      <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="card surface-card"><div class="card-body p-4">
+          <h:form id="buscarForm"><div class="d-flex gap-2 flex-wrap justify-content-between align-items-center mb-3">
+            <div><h2 class="h5 fw-bold mb-0">Listado de productos</h2><small class="text-secondary">#{productoBean.cantidadTotal} resultados</small></div>
+            <div class="d-flex gap-2"><h:inputText value="#{productoBean.filtro}" styleClass="form-control" p:placeholder="Buscar producto o categoría" xmlns:p="http://xmlns.jcp.org/jsf/passthrough" />
+              <h:commandButton value="Buscar" action="#{productoBean.buscar}" styleClass="btn btn-outline-primary" /></div>
+          </div></h:form>
+          <div class="table-responsive"><h:dataTable id="tablaProductos" value="#{productoBean.productos}" var="p" styleClass="table table-hover table-compact align-middle">
+             <h:column><f:facet name="header">Producto</f:facet><div class="fw-semibold">#{p.nombre}</div><small class="text-secondary">#{p.descripcion}</small></h:column>
+             <h:column><f:facet name="header">Categoría</f:facet>#{p.categoriaNombre}</h:column>
+             <h:column><f:facet name="header">Disponible</f:facet><h:outputText value="#{p.stockActual}" styleClass="fw-semibold" /></h:column>
+             <h:column><f:facet name="header">Mínimo</f:facet>#{p.stockMinimo}</h:column>
+             <h:column><f:facet name="header">Estado</f:facet><h:outputText value="#{p.bajo ? 'Reponer' : 'Normal'}" styleClass="#{p.bajo ? 'tag-out' : 'tag-ok'}" /></h:column>
+          </h:dataTable><h:panelGroup rendered="#{empty productoBean.productos}" styleClass="empty-state" layout="block">No hay coincidencias. Intenta otra búsqueda.</h:panelGroup></div>
+          <h:form id="paginarForm" styleClass="d-flex justify-content-between align-items-center mt-3"><small class="text-secondary">Página #{productoBean.pagina} de #{productoBean.totalPaginas}</small><div class="btn-group">
+            <h:commandButton action="#{productoBean.anterior}" value="Anterior" disabled="#{not productoBean.hayAnterior}" styleClass="btn btn-outline-secondary btn-sm" />
+            <h:commandButton action="#{productoBean.siguiente}" value="Siguiente" disabled="#{not productoBean.haySiguiente}" styleClass="btn btn-outline-secondary btn-sm" /></div></h:form>
+        </div></div>
+      </div>
+      <div class="col-lg-4"><div class="card surface-card"><div class="card-body p-4">
+        <h2 class="h5 fw-bold mb-2">Nuevo producto</h2><p class="small text-secondary mb-3">El stock inicial es cero; luego registra una entrada.</p>
+        <h:form id="formProducto">
+          <div class="mb-3"><h:outputLabel for="nombre" value="Nombre *" styleClass="form-label fw-semibold" /><h:inputText id="nombre" value="#{productoBean.nuevo.nombre}" required="true" requiredMessage="Ingresa un nombre." maxlength="120" styleClass="form-control" /><h:message for="nombre" styleClass="text-danger small" /></div>
+          <div class="mb-3"><h:outputLabel for="categoria" value="Categoría *" styleClass="form-label fw-semibold" /><h:selectOneMenu id="categoria" value="#{productoBean.nuevo.idCategoria}" required="true" styleClass="form-select"><f:selectItem itemValue="0" itemLabel="Selecciona una categoría" /><f:selectItems value="#{productoBean.categorias}" var="c" itemValue="#{c.idCategoria}" itemLabel="#{c.nombre}" /><f:validateLongRange minimum="1" /></h:selectOneMenu><h:message for="categoria" styleClass="text-danger small" /></div>
+          <div class="mb-3"><h:outputLabel for="descripcion" value="Descripción" styleClass="form-label" /><h:inputTextarea id="descripcion" value="#{productoBean.nuevo.descripcion}" styleClass="form-control" rows="2" /></div>
+          <div class="row g-2 mb-3"><div class="col-6"><h:outputLabel for="unidad" value="Unidad" styleClass="form-label" /><h:selectOneMenu id="unidad" value="#{productoBean.nuevo.unidadMedida}" styleClass="form-select"><f:selectItem itemValue="unidad" itemLabel="Unidad" /><f:selectItem itemValue="paquete" itemLabel="Paquete" /><f:selectItem itemValue="caja" itemLabel="Caja" /></h:selectOneMenu></div>
+          <div class="col-6"><h:outputLabel for="minimo" value="Stock mínimo" styleClass="form-label" /><h:inputText id="minimo" value="#{productoBean.nuevo.stockMinimo}" required="true" styleClass="form-control" p:type="number" xmlns:p="http://xmlns.jcp.org/jsf/passthrough"><f:validateLongRange minimum="0" maximum="999999" /></h:inputText><h:message for="minimo" styleClass="text-danger small" /></div></div>
+          <h:commandButton value="Guardar producto" action="#{productoBean.registrar}" styleClass="btn btn-primary w-100" />
+        </h:form>
+        <button type="button" class="btn btn-link btn-sm ps-0 mt-2" data-bs-toggle="modal" data-bs-target="#modalAyuda">¿Cómo funciona el stock?</button>
+      </div></div></div>
+      </div>
+      <div class="modal fade" id="modalAyuda" tabindex="-1" aria-labelledby="modalTitulo" aria-hidden="true"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-header"><h2 class="h5 modal-title" id="modalTitulo">Acerca del inventario</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button></div><div class="modal-body">Cada producto se crea con stock 0. Para agregar unidades, entra en Movimientos y registra una ENTRADA. Una SALIDA nunca puede dejar el stock negativo.</div><div class="modal-footer"><button type="button" class="btn btn-primary" data-bs-dismiss="modal">Entendido</button></div></div></div></div>
+    </ui:define>
+</ui:composition>
