@@ -1,0 +1,27 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://xmlns.jcp.org/jsf/html"
+    xmlns:f="http://xmlns.jcp.org/jsf/core" xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+    template="/WEB-INF/plantillas/layout.xhtml">
+    <ui:define name="titulo">Movimientos</ui:define>
+    <ui:define name="contenido">
+      <div class="mb-4"><div class="eyebrow">Operaciones</div><h1 class="page-title">Entradas y salidas</h1><p class="lead-sub">Cada movimiento genera historial y modifica el stock en una transacción.</p></div>
+      <h:messages globalOnly="true" layout="list" infoClass="text-success" errorClass="text-danger" styleClass="alert alert-light border" />
+      <div class="row g-4"><div class="col-lg-4"><div class="card surface-card"><div class="card-body p-4">
+        <h2 class="h5 fw-bold mb-3">Registrar movimiento</h2>
+        <h:form id="formMovimiento">
+          <div class="mb-3"><h:outputLabel for="producto" value="Producto *" styleClass="form-label fw-semibold" /><h:selectOneMenu id="producto" value="#{movimientoBean.productoId}" styleClass="form-select" required="true"><f:selectItem itemValue="0" itemLabel="Selecciona un producto" /><f:selectItems value="#{movimientoBean.productos}" var="p" itemValue="#{p.idProducto}" itemLabel="#{p.nombre} (stock: #{p.stockActual})" /><f:validateLongRange minimum="1" /></h:selectOneMenu><h:message for="producto" styleClass="text-danger small" /></div>
+          <div class="mb-3"><h:outputLabel for="tipo" value="Tipo *" styleClass="form-label fw-semibold" /><h:selectOneMenu id="tipo" value="#{movimientoBean.tipo}" styleClass="form-select"><f:selectItem itemLabel="Entrada de mercadería" itemValue="ENTRADA" /><f:selectItem itemLabel="Salida de mercadería" itemValue="SALIDA" /></h:selectOneMenu></div>
+          <div class="mb-3"><h:outputLabel for="cantidad" value="Cantidad *" styleClass="form-label fw-semibold" /><h:inputText id="cantidad" value="#{movimientoBean.cantidad}" required="true" styleClass="form-control" p:type="number" xmlns:p="http://xmlns.jcp.org/jsf/passthrough"><f:validateLongRange minimum="1" maximum="999999" /></h:inputText><h:message for="cantidad" styleClass="text-danger small" /></div>
+          <div class="mb-3"><h:outputLabel for="obs" value="Observación" styleClass="form-label" /><h:inputTextarea id="obs" value="#{movimientoBean.observacion}" rows="3" styleClass="form-control" /></div>
+          <h:commandButton value="Confirmar movimiento" action="#{movimientoBean.registrar}" styleClass="btn btn-primary w-100" />
+        </h:form></div></div></div>
+      <div class="col-lg-8"><div class="card surface-card"><div class="card-body p-4"><h2 class="h5 fw-bold mb-3">Historial reciente</h2><div class="table-responsive">
+        <h:dataTable value="#{movimientoBean.recientes}" var="m" styleClass="table table-hover align-middle">
+          <h:column><f:facet name="header">Producto</f:facet>#{m.productoNombre}</h:column>
+          <h:column><f:facet name="header">Tipo</f:facet><h:outputText value="#{m.tipo}" styleClass="#{m.tipo eq 'ENTRADA' ? 'tag-in' : 'tag-out'}" /></h:column>
+          <h:column><f:facet name="header">Cantidad</f:facet>#{m.cantidad}</h:column>
+          <h:column><f:facet name="header">Usuario</f:facet>#{m.usuarioNombre}</h:column>
+          <h:column><f:facet name="header">Fecha</f:facet><h:outputText value="#{m.fechaRegistro}"><f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Lima" /></h:outputText></h:column>
+        </h:dataTable></div><h:panelGroup rendered="#{empty movimientoBean.recientes}" layout="block" styleClass="empty-state">No existen movimientos.</h:panelGroup>
+      </div></div></div></div>
+    </ui:define>
+</ui:composition>

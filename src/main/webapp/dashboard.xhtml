@@ -1,0 +1,27 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:f="http://xmlns.jcp.org/jsf/core"
+    xmlns:ui="http://xmlns.jcp.org/jsf/facelets" template="/WEB-INF/plantillas/layout.xhtml">
+    <ui:define name="titulo">Panel principal</ui:define>
+    <ui:define name="contenido">
+        <div class="d-flex flex-wrap justify-content-between gap-3 align-items-start mb-4">
+            <div><div class="eyebrow">Panel de control</div><h1 class="page-title">Resumen del inventario</h1>
+            <p class="lead-sub">Indicadores actualizados directamente desde la base de datos de Nova Lima.</p></div>
+            <div><h:link outcome="/movimientos" value="+ Registrar movimiento" styleClass="btn btn-primary" /></div>
+        </div>
+        <h:panelGroup rendered="#{not dashboardBean.conexionActiva}" layout="block" styleClass="alert alert-warning">No se ha podido conectar a la base de datos MySQL. Comprueba DB_URL, DB_USER y DB_PASSWORD.</h:panelGroup>
+        <div class="row g-3 mb-4">
+          <div class="col-md-4"><div class="stat-card"><div class="stat-caption">Productos activos</div><div class="stat-value"><h:outputText value="#{dashboardBean.productos}" /></div><div class="stat-foot">Productos en el catálogo</div></div></div>
+          <div class="col-md-4"><div class="stat-card"><div class="stat-caption">Unidades disponibles</div><div class="stat-value"><h:outputText value="#{dashboardBean.unidades}" /></div><div class="stat-foot">Suma de stock actual</div></div></div>
+          <div class="col-md-4"><div class="stat-card alert-stat"><div class="stat-caption">Alertas de reposición</div><div class="stat-value"><h:outputText value="#{dashboardBean.alertas}" /></div><div class="stat-foot">Stock actual ≤ stock mínimo</div></div></div>
+        </div>
+        <div class="card surface-card"><div class="card-header bg-white border-0 d-flex justify-content-between align-items-center p-4 pb-2"><div><h2 class="h5 fw-bold mb-1">Últimos movimientos</h2><p class="small text-secondary mb-0">Trazabilidad de las operaciones recientes</p></div><h:link outcome="/movimientos" value="Ver todos" styleClass="btn btn-sm btn-outline-primary" /></div>
+          <div class="table-responsive px-3 pb-3"><h:dataTable value="#{dashboardBean.recientes}" var="m" styleClass="table table-hover align-middle mt-2">
+            <h:column><f:facet name="header">Producto</f:facet>#{m.productoNombre}</h:column>
+            <h:column><f:facet name="header">Tipo</f:facet><h:outputText value="#{m.tipo}" styleClass="#{m.tipo eq 'ENTRADA' ? 'tag-in' : 'tag-out'}" /></h:column>
+            <h:column><f:facet name="header">Cantidad</f:facet>#{m.cantidad}</h:column>
+            <h:column><f:facet name="header">Responsable</f:facet>#{m.usuarioNombre}</h:column>
+            <h:column><f:facet name="header">Fecha</f:facet><h:outputText value="#{m.fechaRegistro}"><f:convertDateTime pattern="dd/MM/yyyy HH:mm" timeZone="America/Lima" /></h:outputText></h:column>
+          </h:dataTable><h:panelGroup rendered="#{empty dashboardBean.recientes}" layout="block" styleClass="empty-state">Aún no hay movimientos registrados.</h:panelGroup></div>
+        </div>
+    </ui:define>
+</ui:composition>

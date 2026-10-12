@@ -1,26 +1,17 @@
 package pe.utp.inventario.servlet;
 
-import pe.utp.inventario.dao.ProductoDAO;
-
-import javax.servlet.ServletException;
+import java.io.IOException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 
+/** Compatibilidad con enlaces del APF1. La lógica vigente está en JSF/Facelets. */
 @WebServlet("/productos")
 public class ProductoServlet extends HttpServlet {
-    private final ProductoDAO productoDAO = new ProductoDAO();
-
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        try {
-            request.setAttribute("productos", productoDAO.listar());
-            request.getRequestDispatcher("/productos.jsp").forward(request, response);
-        } catch (Exception e) {
-            request.setAttribute("error", e.getMessage());
-            request.getRequestDispatcher("/error.jsp").forward(request, response);
-        }
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        response.sendRedirect(request.getContextPath() + "/productos.xhtml");
     }
+    // HttpServlet mantiene HTTP 405 para POST antiguo: las operaciones se hacen por JSF.
 }

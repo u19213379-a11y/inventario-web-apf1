@@ -4,29 +4,30 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class ConexionBD {
+/** JDBC centralizado. Variables de entorno: DB_URL, DB_USER y DB_PASSWORD. */
+public final class ConexionBD {
+    private static final String URL_POR_DEFECTO =
+        "jdbc:mysql://localhost:3306/inventario_apf1?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Lima";
 
-    private static final String URL = "jdbc:mysql://localhost:3306/inventario_apf1?useSSL=false&serverTimezone=America/Lima";
-    private static final String USER = "root";
-    private static final String PASSWORD = "admin";
+    private ConexionBD() { }
 
-    private ConexionBD() {
+    private static String valor(String nombre, String defecto) {
+        String valor = System.getenv(nombre);
+        return valor == null || valor.isBlank() ? defecto : valor;
     }
 
     public static Connection obtenerConexion() throws SQLException {
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-            return DriverManager.getConnection(URL, USER, PASSWORD);
-        } catch (ClassNotFoundException e) {
-            throw new SQLException("No se encontró el driver MySQL Connector/J", e);
-        }
+        return DriverManager.getConnection(
+            valor("DB_URL", URL_POR_DEFECTO),
+            valor("DB_USER", "root"),
+            valor("DB_PASSWORD", "")
+        );
     }
 
     public static boolean probarConexion() {
         try (Connection connection = obtenerConexion()) {
-            return connection != null && !connection.isClosed();
-        } catch (SQLException e) {
-            System.err.println("Error de conexión: " + e.getMessage());
+            return connection.isValid(3);
+        } catch (SQLException ex) {
             return false;
         }
     }
